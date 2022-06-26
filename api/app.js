@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require("cors");
 const idAutoIncrement = require("id-auto-increment");
+const uuidBuffer = require('uuid-buffer');
 const { v4: uuidv4 } = require('uuid');
 
 const cassandra = require('cassandra-driver');
@@ -37,8 +38,8 @@ app.post ("/create", async (req,res)=>{
     const fechaNacimiento=req.body.fecha_nacimiento
     
     var id1=uuidv4()
-    const comentarios=req.body.comentarios
-    const farmaco=req.body.farmaco
+    const comentarios=req.body.comentario
+    const farmaco=req.body.farmacos
     const doctor=req.body.doctor
     
     await client.execute(query, [rut]).then(result => {
@@ -46,13 +47,14 @@ app.post ("/create", async (req,res)=>{
       console.log('que es 2: ', result.rows[0])
       if(result.rows[0]==undefined){
         client.execute(query1,[id,nombre,apellido,rut,email,fechaNacimiento]).then(result1 =>{
-          console.log("paciente: ",result1)
+          //console.log("paciente: ",result1)
         })
         client1.execute(query2,[id1,id,comentarios,farmaco,doctor]).then(result2 =>{
-          console.log("receta: ",result2)
+          //console.log("receta: ",result2)
         })
-        res.send("paciente Agregado. id paciente: ",id )
-        console.log("Paciente agregado")
+        res.send("paciente Agregado. id paciente: " )
+        console.log("Paciente agregado ",id ," - ", id1)
+        console.log("id paciente: ",id ," - id receta: ", id1)
 
       }else{
         console.log("Usuario ya existe")
@@ -65,43 +67,66 @@ app.post ("/create", async (req,res)=>{
     console.log(error)
   }
 })
-app.get("/algo", async ()=>{
-  try {
-    //const query = 'INSERT INTO paciente (id,nombre,apellido,rut,email,fecha_nacimiento) VALUES(?,?,?,?,?,?)';
-    //await client.execute(query, [ uuidv4(),'benja','peres','4','1','abril' ]).then(result => {
-    //  console.log('User with email %s', result)
-    //});
-    const query1= 'SELECT * FROM paciente WHERE id=? ALLOW FILTERING';
-    const query = "DELETE FROM paciente WHERE id=?;";
-    //await client.execute(query, ['273ec806-0d74-4095-bdef-ac89f698dfa7']).then(result => {
-    //  console.log('QUE ES ESTO?  %s', result.rows[0])
-    //});
-    await client.execute(query1, ['273ec806-0d74-4095-bdef-ac89f698dfa7']).then(result => {
-      console.log('QUE ES ESTO?  %s', result)
-      console.log('que es 2: ', result.rows[0])
-    });
-    /*client.execute(query).then(result => {
-      console.log(' que es esto', result.rows[0])
-        
-    });*/
-   
-  } catch (error) {
-    console.log(error)
-  }
 
-  /*
-  const query = 'INSERT INTO recetas (id, nombre,apellido,rut,email,fecha_nacimiento) VALUES(?,?,?,?,?)';
-  */
+app.post("/edit", async (req,res)=>{
+  const query = 'SELECT * FROM receta WHERE id=? ALLOW FILTERING';
+  const query1 = 'UPDATE receta SET comentario = ?, farmacos = ?, doctor = ?  WHERE id=?';
+
+  const id=req.body.id
+  const comentarios=req.body.comentario
+  const farmaco=req.body.farmacos
+  const doctor=req.body.doctor
+
+  await client1.execute(query, [id]).then(result => {
+    if (result.rows[0]==undefined){
+      res.send("No existe id, no se puede editar")
+    }else{
+      client1.execute(query1,[comentarios,farmaco,doctor,id]).then(result1=>{
+        console.log("que sale aca: ",result1)
+      })
+      res.send("editado")
+    }
+  });
+
 })
-/*
-const query = 'SELECT name, email FROM users WHERE key = ?';
 
-client.execute(query, [ 'someone' ])
-  .then(result => console.log('User with email %s', result.rows[0].email));
+app.post("/delete", async(req,res)=>{
+  const query = 'SELECT * FROM receta WHERE id=? ALLOW FILTERING';
+  const query1 = 'DELETE FROM receta WHERE id=?';
+  const query2 = 'DELETE FROM paciente WHERE id=?';
+  const id=req.body.id
+  
+  await client1.execute(query, [id]).then(result => {
+    console.log(result.rows)
+    if (result.rows[0]==undefined || result.rows.lenght==0){
+      res.send("No existe id, no se puede editar")
+    }else{
+      const idReceta=uuidBuffer.toString(result.rows[0].id.buffer)
+      const idPaciente=uuidBuffer.toString(result.rows[0].id_paciente.buffer)
+      client1.execute(query1,[idReceta]).then(result1 =>{
+        console.log(result1)
+      })
+      client.execute(query2,[idPaciente]).then(result2 =>{
+        console.log(result2)
+      })
+      res.send("eliminado")
+    }
+  });
+})
 
-
-
-*/
+app.get("/mostrar",async(req,res)=>{
+  const query = 'SELECT * FROM paciente WHERE id=? ALLOW FILTERING';
+  const query1= 'SELECT * FROM receta WHERE id=? ALLOW FILTERING';
+  await client1.execute(query1, [req.body.id]).then(result => {
+    client.execute(query, [req.body.id]).then(result1 =>{
+      console.log("lista de pacientes: ",result.rows)
+      console.log("lista de recetas: ",result1.rows)
+    })
+  });
+})
+app.get("/",()=>{
+  console.log("algo")
+})
 app.listen(port, ()=>{
     console.log(`Express listening at http://localhost:${port}`)
 })

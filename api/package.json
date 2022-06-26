@@ -16,6 +16,7 @@
       "dotenv": "^16.0.0",
       "cassandra-driver" : "^4.6.3",
       "id-auto-increment" :"^1.0.1",
-      "uuid":"^8.3.2"
+      "uuid":"^8.3.2",
+      "uuid-buffer":"1.0.3"
     }
   }

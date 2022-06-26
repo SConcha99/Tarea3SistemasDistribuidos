@@ -45,7 +45,7 @@ app.post ("/create", async (req,res)=>{
     await client.execute(query, [rut]).then(result => {
       //console.log('QUE ES ESTO?  %s', result)
       console.log('que es 2: ', result.rows[0])
-      if(result.rows[0]==undefined){
+      if(result.rows[0]==undefined || result.rows.lenght==0){
         client.execute(query1,[id,nombre,apellido,rut,email,fechaNacimiento]).then(result1 =>{
           //console.log("paciente: ",result1)
         })
@@ -78,7 +78,7 @@ app.post("/edit", async (req,res)=>{
   const doctor=req.body.doctor
 
   await client1.execute(query, [id]).then(result => {
-    if (result.rows[0]==undefined){
+    if (result.rows[0]==undefined || result.rows.lenght==0){
       res.send("No existe id, no se puede editar")
     }else{
       client1.execute(query1,[comentarios,farmaco,doctor,id]).then(result1=>{

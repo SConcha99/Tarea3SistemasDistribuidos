@@ -50,6 +50,10 @@ El repositorio debe de ser clonado en alguna carpeta mediante el comando
 ```
 $ git clone https://github.com/SConcha99/Tarea3SistemasDistribuidos.git
 ```
+Una vez clonado el proyecto, se deben inicializar los contenedores con el siguiente comando:
+ ```
+ docker-compose up --build
+ ```
 
 ## Resolución Preguntas
 

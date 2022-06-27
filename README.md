@@ -54,6 +54,54 @@ Una vez clonado el proyecto, se deben inicializar los contenedores con el siguie
  ```
  docker-compose up --build
  ```
+### Creacion de Receta
+Para la creacion de una receta se realiza una solicitud en formato POST
+
+```
+http://localhost:3000/create
+```
+ingresando lo siguiente: 
+
+```
+{
+    "nombre": "sebastian",
+    "apellido":"gonzalez",
+    "rut":"1",
+    "email":"s@mail.cl",
+    "fecha_nacimiento":"1",
+    "comentario":"amigdalitisssssss",
+    "farmacos":"tecito de yerba con azucar",
+    "doctor":"diego el grande"
+}
+```
+
+Una vez realizada la creacion de la receta, este entregara en la consola la id de la receta y del paciente en formato uuid, los cuales podran ser usadas en otras operaciones. 
+### Editar Receta
+Para editar la receta se realiza una solicitud en formato POST
+```
+http://localhost:3000/edit
+```
+ingresando los siguientes datos, en el caso de la id se ingresa la de la receta en formato uuid que este registrada.
+```
+{
+    "id": "0a9e5691-c692-445f-a411-74d9eb686906",
+    " comentario ": " Amigdalitis aguda ",
+    " farmacos ": " Paracetamol con aguita ",
+    " doctor ": "El Waton de la Fruta "
+}
+```
+### Eliminar Receta
+Para eliminar una receta se realiza una solicitud en formato POST
+```
+http://localhost:3000/delete
+```
+ingresando los siguientes datos, donde la id ingresada a la receta en formato uuid que este registrada.
+
+```
+{
+    "id": "0a9e5691-c692-445f-a411-74d9eb686906",
+}
+```
 
 ## Resolución Preguntas
 
